@@ -1,11 +1,11 @@
-﻿using Unity.Android.Gradle.Manifest;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace TrippleQ.AvatarSystem
 {
     public class AvatarSystemBootstrap : MonoBehaviour
     {
         [SerializeField] private AvatarDatabaseSO _db;
+        [SerializeField] AvatarIconLibrarySO _iconLibrary;
 
         private AvatarService _service;
         public static AvatarService Service { get; private set; }
@@ -21,6 +21,7 @@ namespace TrippleQ.AvatarSystem
             Debug.Log($"Init ok={res.ok} err={res.error}");
 
             AvatarServiceLocator.Provide(_service);
+            AvatarIconResolver.SetLibrary(_iconLibrary);
         }
     }
 }

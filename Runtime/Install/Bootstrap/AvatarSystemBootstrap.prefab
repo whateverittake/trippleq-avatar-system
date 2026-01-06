@@ -45,3 +45,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _db: {fileID: 11400000, guid: 968acc83df47e7a47a06bd69b561d8c8, type: 2}
+  _iconLibrary: {fileID: 11400000, guid: a0fade8e59dc50642b5b1271bbc624da, type: 2}

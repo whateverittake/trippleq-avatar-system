@@ -46,17 +46,11 @@ namespace TrippleQ.AvatarSystem
     [Serializable]
     public sealed class AvatarDefinition
     {
-        [Tooltip("Unique string id")]
+        [Tooltip("Unique string id - iconkey for load icon")]
         public string id;
 
         [Tooltip("Display name (optional, can be localized outside)")]
         public string displayName;
-
-        [Tooltip("key for auto load icon")]
-        public string iconKey; // e.g. "avatar_0"
-
-        [Tooltip("Icon sprite reference (UI can use it). Core does not require it.")]
-        public Sprite icon;
 
         [Tooltip("Unlock rule type")]
         public AvatarUnlockType unlockType = AvatarUnlockType.Default;
