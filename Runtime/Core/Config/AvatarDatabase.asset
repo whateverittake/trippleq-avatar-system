@@ -12,4 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31a51b40373e7c34c8dd8a417be85a75, type: 3}
   m_Name: AvatarDatabase
   m_EditorClassIdentifier: 
-  avatars: []
+  avatars:
+  - id: avatar01
+    displayName: 
+    unlockType: 0
+    unlockValue: 0
+    tag: 
+    isDefault: 0
