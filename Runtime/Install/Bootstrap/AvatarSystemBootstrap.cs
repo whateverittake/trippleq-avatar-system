@@ -10,7 +10,7 @@ namespace TrippleQ.AvatarSystem
         private AvatarService _service;
         public static AvatarService Service { get; private set; }
 
-        void Start()
+        void Awake()
         {
             _service = new AvatarService();
 

@@ -80,6 +80,11 @@ namespace TrippleQ.AvatarSystem
             return AvatarResult.Ok();
         }
 
+        public AvatarDatabaseSO GetAvatarDatabaseSO()
+        {
+            return _db;
+        }
+
         public AvatarResult<AvatarUserState> GetUserStateSnapshot()
         {
             if (!_initialized) return AvatarResult<AvatarUserState>.Fail(AvatarError.NotInitialized, "Not initialized.");

@@ -1,31 +1,17 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 
 namespace TrippleQ.AvatarSystem
 {
+    //“công tắc mở / đóng màn hình avatar + nơi inject UI framework vào Avatar package”.
     public class AvatarScreenController : MonoBehaviour
     {
-        [SerializeField] Transform _popupRoot; // Canvas / UI root
-
-        [SerializeField] GameObject _avatar;
-
-        public IPopupPresenter PopupPresenter { get; set; }
-
-        //[SerializeField] AvatarGridView grid;
-        //[SerializeField] AvatarPreviewView preview;
+        private AvatarPopupPresenter _presenter;
+        private IAvatarPopupView _view;
 
         void OnEnable()
         {
             StartCoroutine(BindWhenReady());
-        }
-
-        void OnDisable()
-        {
-            if (!AvatarServiceLocator.IsReady) return;
-
-            var svc = AvatarServiceLocator.Service;
-            svc.OnAvatarChanged -= OnAvatarChanged;
-            svc.OnInventoryChanged -= Refresh;
         }
 
         IEnumerator BindWhenReady()
@@ -49,41 +35,40 @@ namespace TrippleQ.AvatarSystem
 
             var svc = AvatarServiceLocator.Service;
 
-            svc.OnAvatarChanged += OnAvatarChanged;
-            svc.OnInventoryChanged += Refresh;
-
-            if (PopupPresenter == null)
+            if (_presenter == null)
             {
-                if (_popupRoot == null)
-                    _popupRoot = transform; // fallback
-
-                PopupPresenter = new DefaultPopupPresenter(_popupRoot);
+                _presenter = new AvatarPopupPresenter(AvatarServiceLocator.Service, svc.GetAvatarDatabaseSO());
             }
-
-            Refresh();
-            OnAvatarChanged(svc.GetSelectedAvatarId().value);
         }
 
-        private void Refresh()
+        public void OpenAvatarPopup()
         {
-            //grid.Bind(AvatarSystemBootstrap.Service);
+            GameObject popup = null; //tuy framework, game sẽ tạo popup từ hệ thống UI của nó
+            _view = popup.GetComponent<IAvatarPopupView>();
 
-            //iconImage.sprite = AvatarIconResolver.Get(avatar01);
+            _presenter.Bind(_view);
+            _presenter.Show();
         }
 
-        private void OnAvatarChanged(AvatarId id)
+        public void CloseAvatarPopup() 
         {
-            //preview.SetAvatar(id);
+            if(_view == null) return;
+
+            _presenter.Hide();
+            _presenter.Unbind();
+
+            _view = null;
         }
 
-        public void ShowAvatarPopup()
+        private void OnDisable()
         {
-            PopupPresenter.Show(_avatar);
+            // cleanup lifecycle only
+            CloseAvatarPopup();
         }
 
-        public void CloseAvatarPopup()
+        public void OnAvatarWidgetClicked()
         {
-            PopupPresenter.Close(_avatar);
+            OpenAvatarPopup();
         }
     }
 }
