@@ -1,4 +1,5 @@
 ﻿using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,7 +12,7 @@ namespace TrippleQ.AvatarSystem
         [SerializeField] private Image icon;
         [SerializeField] private GameObject selectedRing;
         [SerializeField] private GameObject lockOverlay;
-        [SerializeField] private Text label; // optional
+        [SerializeField] private TMP_Text _text; // optional
 
         private Action<AvatarDefinition> _onClick;
 
@@ -28,8 +29,8 @@ namespace TrippleQ.AvatarSystem
                 button.onClick.AddListener(() => _onClick?.Invoke(Def));
             }
 
-            if (label != null)
-                label.text = string.IsNullOrEmpty(def.displayName) ? def.id : def.displayName;
+            if (_text != null)
+                _text.text = string.IsNullOrEmpty(def.displayName) ? def.id : def.displayName;
         }
 
         public void Render(Sprite iconSprite, bool owned, bool selected)
