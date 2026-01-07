@@ -16,5 +16,6 @@
     "url": "https://github.com/whateverittake/trippleq-avatar-system"
   },
   "dependencies": {
+      "com.trippleq.ui-kit": "https://github.com/whateverittake/trippleq-ui-kit.git#main"
   }
 }
