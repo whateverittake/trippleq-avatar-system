@@ -6,15 +6,11 @@ namespace TrippleQ.AvatarSystem
     {
         [SerializeField] AvatarWidgetView view;
 
-        void OnEnable()
+        public void SetUpEvent()
         {
+            if (AvatarServiceLocator.Service != null) AvatarServiceLocator.Service.OnAvatarChanged -= OnAvatarChanged;
             AvatarServiceLocator.Service.OnAvatarChanged += OnAvatarChanged;
             Refresh();
-        }
-
-        void OnDisable()
-        {
-            AvatarServiceLocator.Service.OnAvatarChanged -= OnAvatarChanged;
         }
 
         void OnAvatarChanged(AvatarId id)
