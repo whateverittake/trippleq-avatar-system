@@ -33,11 +33,11 @@ namespace TrippleQ.AvatarSystem
                 if (string.IsNullOrWhiteSpace(json))
                     return true;
 
-                var w = JsonUtility.FromJson<Wrapper>(json);
-                if (w == null) return true;
+                state = JsonUtility.FromJson<AvatarUserState>(json) ?? new AvatarUserState();
 
-                state.selectedAvatarId = w.selectedAvatarId;
-                state.ownedAvatarIds = w.ownedAvatarIds ?? new List<string>();
+                state.ownedAvatarIds ??= new List<string>();
+                state.ownedFrameIds ??= new List<string>();
+
                 return true;
             }
             catch
@@ -51,13 +51,11 @@ namespace TrippleQ.AvatarSystem
         {
             try
             {
-                var w = new Wrapper
-                {
-                    selectedAvatarId = state?.selectedAvatarId,
-                    ownedAvatarIds = state?.ownedAvatarIds ?? new List<string>()
-                };
+                state ??= new AvatarUserState();
+                state.ownedAvatarIds ??= new List<string>();
+                state.ownedFrameIds ??= new List<string>();
 
-                var json = JsonUtility.ToJson(w);
+                var json = JsonUtility.ToJson(state);
                 PlayerPrefs.SetString(_key, json);
                 PlayerPrefs.Save();
                 return true;

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using UnityEngine;
@@ -9,6 +9,8 @@ namespace TrippleQ.AvatarSystem
     {
         public event Action OnInitialized;               // fired when initialized
         public event Action<AvatarId> OnAvatarChanged;          // fired when selected changes
+        public event Action<string> OnUserNameChanged;
+        public event Action<AvatarId> OnFrameChanged;
         public event Action OnInventoryChanged;                 // fired when owned list changes
 
         private AvatarDatabaseSO _db;
@@ -39,45 +41,63 @@ namespace TrippleQ.AvatarSystem
             _db.BuildIndex();
 
             // Load
-            if (!_storage.TryLoad(out _state))
-            {
-                _log.Warn("AvatarService: storage load failed; using fresh state.");
+            if (_storage.TryLoad(out var loaded))
+                _state = loaded;
+            else
                 _state = new AvatarUserState();
-            }
 
-            // Ensure default owned
-            var def = _db.GetDefaultOrFirst();
-            if (def != null)
-            {
-                var defId = def.AvatarId;
+            // Repair defaults
+            if (string.IsNullOrWhiteSpace(_state.userName)) _state.userName = "Player";
+            
+            if (_state.ownedAvatarIds == null) _state.ownedAvatarIds = new List<string>();
+            if(_state.ownedFrameIds == null) _state.ownedFrameIds = new List<string>();
 
-                // Default avatars should be owned by default (common casual pattern).
-                if (!_state.Owns(defId))
-                    _state.AddOwned(defId);
+            // chọn default avatar nếu chưa có
+            if (string.IsNullOrWhiteSpace(_state.selectedAvatarId)) _state.selectedAvatarId = GetDefaultAvatarIdFromDb();
+            if (string.IsNullOrWhiteSpace(_state.selectedFrameId)) _state.selectedFrameId = GetDefaultFrameIdFromDb();
 
-                // Ensure selected exists
-                if (string.IsNullOrWhiteSpace(_state.selectedAvatarId))
-                    _state.selectedAvatarId = defId.Value;
-            }
+            EnsureOwnedSelected();
+            EnsureOwnedSelectedFrame();
 
-            // Repair selection if invalid
-            var currentId = new AvatarId(_state.selectedAvatarId);
-            if (!currentId.IsValid || !_db.TryGet(currentId, out _))
-            {
-                var fallback = _db.GetDefaultOrFirst();
-                _state.selectedAvatarId = fallback != null ? fallback.id : string.Empty;
-            }
-
-            // Save back repaired state
-            if (!_storage.TrySave(_state))
-            {
-                _log.Warn("AvatarService: storage save failed during Initialize.");
-            }
+            _storage.TrySave(_state);
 
             _initialized = true;
             OnInitialized?.Invoke();
-
             return AvatarResult.Ok();
+
+            //// Ensure default owned
+            //var def = _db.GetDefaultOrFirst();
+            //if (def != null)
+            //{
+            //    var defId = def.AvatarId;
+
+            //    // Default avatars should be owned by default (common casual pattern).
+            //    if (!_state.Owns(defId))
+            //        _state.AddOwned(defId);
+
+            //    // Ensure selected exists
+            //    if (string.IsNullOrWhiteSpace(_state.selectedAvatarId))
+            //        _state.selectedAvatarId = defId.Value;
+            //}
+
+            //// Repair selection if invalid
+            //var currentId = new AvatarId(_state.selectedAvatarId);
+            //if (!currentId.IsValid || !_db.TryGet(currentId, out _))
+            //{
+            //    var fallback = _db.GetDefaultOrFirst();
+            //    _state.selectedAvatarId = fallback != null ? fallback.id : string.Empty;
+            //}
+
+            //// Save back repaired state
+            //if (!_storage.TrySave(_state))
+            //{
+            //    _log.Warn("AvatarService: storage save failed during Initialize.");
+            //}
+
+            //_initialized = true;
+            //OnInitialized?.Invoke();
+
+            //return AvatarResult.Ok();
         }
 
         public AvatarDatabaseSO GetAvatarDatabaseSO()
@@ -91,8 +111,12 @@ namespace TrippleQ.AvatarSystem
             // shallow copy for safety
             var snap = new AvatarUserState
             {
+                userName = _state.userName,
                 selectedAvatarId = _state.selectedAvatarId,
-                ownedAvatarIds = new List<string>(_state.ownedAvatarIds ?? new List<string>())
+                selectedFrameId = _state.selectedFrameId,
+
+                ownedAvatarIds = new List<string>(_state.ownedAvatarIds ?? new List<string>()),
+                ownedFrameIds = new List<string>(_state.ownedFrameIds ?? new List<string>())
             };
             return AvatarResult<AvatarUserState>.Ok(snap);
         }
@@ -102,6 +126,14 @@ namespace TrippleQ.AvatarSystem
             if (!_initialized) return AvatarResult<AvatarId>.Fail(AvatarError.NotInitialized, "Not initialized.");
             var id = new AvatarId(_state.selectedAvatarId);
             if (!id.IsValid) return AvatarResult<AvatarId>.Fail(AvatarError.InvalidId, "Selected avatar id invalid.");
+            return AvatarResult<AvatarId>.Ok(id);
+        }
+
+        public AvatarResult<AvatarId> GetSelectedFrameId()
+        {
+            if (!_initialized) return AvatarResult<AvatarId>.Fail(AvatarError.NotInitialized, "Not initialized.");
+            var id = new AvatarId(_state.selectedFrameId);
+            if (!id.IsValid) return AvatarResult<AvatarId>.Fail(AvatarError.InvalidId, "Selected frame id invalid.");
             return AvatarResult<AvatarId>.Ok(id);
         }
 
@@ -136,6 +168,33 @@ namespace TrippleQ.AvatarSystem
             return AvatarResult<AvatarOwnershipState>.Ok(canUnlock ? AvatarOwnershipState.Unlockable : AvatarOwnershipState.Locked);
         }
 
+        public AvatarResult<AvatarOwnershipState> GetFrameState(AvatarId id)
+        {
+            if (!_initialized) return AvatarResult<AvatarOwnershipState>.Fail(AvatarError.NotInitialized, "Not initialized.");
+            if (!id.IsValid) return AvatarResult<AvatarOwnershipState>.Fail(AvatarError.InvalidId, "Invalid id.");
+
+            if (!_db.TryGetFrame(id, out var def))
+                return AvatarResult<AvatarOwnershipState>.Fail(AvatarError.NotFoundInDatabase, "Not in database.", AvatarOwnershipState.Unknown);
+
+            var selected = string.Equals(_state.selectedFrameId, id.Value, StringComparison.Ordinal);
+            var owned = _state.OwnFrame(id);
+
+            if (selected && owned) return AvatarResult<AvatarOwnershipState>.Ok(AvatarOwnershipState.Selected);
+            if (owned) return AvatarResult<AvatarOwnershipState>.Ok(AvatarOwnershipState.Owned);
+
+            var canUnlock = _unlockProvider.CanUnlock(def, _state, out _);
+            return AvatarResult<AvatarOwnershipState>.Ok(canUnlock ? AvatarOwnershipState.Unlockable : AvatarOwnershipState.Locked);
+        }
+
+        public AvatarResult SaveProfile()
+        {
+            if (!_initialized) return AvatarResult.Fail(AvatarError.NotInitialized, "Not initialized.");
+
+            return _storage.TrySave(_state)
+                    ? AvatarResult.Ok()
+                    : AvatarResult.Fail(AvatarError.StorageFailure);
+        }
+
         public AvatarResult TrySelect(AvatarId id)
         {
             if (!_initialized) return AvatarResult.Fail(AvatarError.NotInitialized, "Not initialized.");
@@ -159,6 +218,32 @@ namespace TrippleQ.AvatarSystem
             }
 
             OnAvatarChanged?.Invoke(id);
+            return AvatarResult.Ok();
+        }
+
+        public AvatarResult TrySelectFrame(AvatarId id) 
+        {
+            if (!_initialized) return AvatarResult.Fail(AvatarError.NotInitialized, "Not initialized.");
+            if (!id.IsValid) return AvatarResult.Fail(AvatarError.InvalidId, "Invalid id.");
+
+            if (!_db.TryGetFrame(id, out _))
+                return AvatarResult.Fail(AvatarError.NotFoundInDatabase, $"Avatar '{id.Value}' not in database.");
+
+            if (!_state.OwnFrame(id))
+                return AvatarResult.Fail(AvatarError.NotOwned, "Avatar not owned.");
+
+            if (string.Equals(_state.selectedFrameId, id.Value, StringComparison.Ordinal))
+                return AvatarResult.Ok("Already selected.");
+
+            _state.selectedFrameId = id.Value;
+
+            if (!_storage.TrySave(_state))
+            {
+                _log.Warn("AvatarService: save failed on select.");
+                return AvatarResult.Fail(AvatarError.StorageFailure, "Failed to save selection.");
+            }
+
+            OnFrameChanged?.Invoke(id);
             return AvatarResult.Ok();
         }
 
@@ -191,6 +276,35 @@ namespace TrippleQ.AvatarSystem
             return AvatarResult.Ok();
         }
 
+        public AvatarResult TryUnlockFrame(AvatarId id)
+        {
+            if (!_initialized) return AvatarResult.Fail(AvatarError.NotInitialized, "Not initialized.");
+            if (!id.IsValid) return AvatarResult.Fail(AvatarError.InvalidId, "Invalid id.");
+
+            if (!_db.TryGetFrame(id, out var def))
+                return AvatarResult.Fail(AvatarError.NotFoundInDatabase, $"Frame '{id.Value}' not in database.");
+
+            if (_state.OwnFrame(id))
+                return AvatarResult.Ok("Already owned.");
+
+            if (!_unlockProvider.CanUnlock(def, _state, out var reason))
+                return AvatarResult.Fail(AvatarError.NotUnlockable, reason ?? "Not unlockable.");
+
+            if (!_unlockProvider.TryUnlock(def, _state, out var err))
+                return AvatarResult.Fail(AvatarError.UnlockProviderFailure, err ?? "Unlock failed.");
+
+            _state.AddOwnedFrame(id);
+
+            if (!_storage.TrySave(_state))
+            {
+                _log.Warn("AvatarService: save failed on unlock.");
+                return AvatarResult.Fail(AvatarError.StorageFailure, "Failed to save frame unlock.");
+            }
+
+            OnInventoryChanged?.Invoke();
+            return AvatarResult.Ok();
+        }
+
         // Convenience: unlock then select (common UX)
         public AvatarResult TryUnlockAndSelect(AvatarId id)
         {
@@ -209,6 +323,25 @@ namespace TrippleQ.AvatarSystem
             if (!_state.Owns(id)) return unlock.ok ? AvatarResult.Fail(AvatarError.NotOwned, "Unlock did not grant ownership.") : unlock;
 
             return TrySelect(id);
+        }
+
+        public AvatarResult TryUnlockAndSelectFrame(AvatarId id)
+        {
+            var unlock = TryUnlockFrame(id);
+            if (!unlock.ok && unlock.error != AvatarError.None)
+            {
+                // If already owned, proceed to select
+                if (unlock.error != AvatarError.None && unlock.error != AvatarError.NotUnlockable && unlock.error != AvatarError.UnlockProviderFailure)
+                {
+                    // For cases like StorageFailure, stop
+                    if (unlock.error == AvatarError.StorageFailure) return unlock;
+                }
+            }
+
+            // If not owned and unlock failed -> stop
+            if (!_state.OwnFrame(id)) return unlock.ok ? AvatarResult.Fail(AvatarError.NotOwned, "Unlock did not grant ownership.") : unlock;
+
+            return TrySelectFrame(id);
         }
 
         // Admin / debug: grant ownership directly (e.g., migration, cheat, support tool)
@@ -236,6 +369,50 @@ namespace TrippleQ.AvatarSystem
                 return AvatarResult.Fail(AvatarError.StorageFailure, "Failed to save grant.");
 
             return AvatarResult.Ok();
+        }
+
+        internal AvatarResult TryUpdateUserName(string newName)
+        {
+            if (!_initialized) return AvatarResult.Fail(AvatarError.NotInitialized);
+            newName = (newName ?? "").Trim();
+            if (newName.Length == 0) return AvatarResult.Fail(AvatarError.InvalidId, "Empty name");
+            if (string.Equals(_state.userName, newName, StringComparison.Ordinal))
+                return AvatarResult.Ok();
+            _state.userName = newName;
+            if (!_storage.TrySave(_state))
+                return AvatarResult.Fail(AvatarError.StorageFailure);
+            OnUserNameChanged?.Invoke(newName);
+            return AvatarResult.Ok();
+        }
+
+        private string GetDefaultAvatarIdFromDb()
+        {
+            var def = _db.GetDefaultOrFirst();
+            return def != null ? def.id : string.Empty;
+        }
+
+        private string GetDefaultFrameIdFromDb()
+        {
+            var def = _db.GetDefaultFrameOrFirst();
+            return def != null ? def.id : string.Empty;
+        }
+
+        private void EnsureOwnedSelected()
+        {
+            if (!string.IsNullOrWhiteSpace(_state.selectedAvatarId) &&
+                !_state.ownedAvatarIds.Contains(_state.selectedAvatarId))
+            {
+                _state.ownedAvatarIds.Add(_state.selectedAvatarId);
+            }
+        }
+
+        private void EnsureOwnedSelectedFrame()
+        {
+            if (!string.IsNullOrWhiteSpace(_state.selectedFrameId) &&
+                !_state.ownedFrameIds.Contains(_state.selectedFrameId))
+            {
+                _state.ownedFrameIds.Add(_state.selectedFrameId);
+            }
         }
     }
 }

@@ -13,5 +13,8 @@ MonoBehaviour:
   m_Name: AvatarIconLibrary
   m_EditorClassIdentifier: 
   entries:
-  - iconKey: avatar01
-    sprite: {fileID: 21300000, guid: 656304e3ca22f6a42a46ad02560bb925, type: 3}
+  - iconKey: avatar1
+    sprite: {fileID: 21300000, guid: 9f5cbf7becbf1344fb26d80e3f174656, type: 3}
+  entriesFrame:
+  - iconKey: frame1
+    sprite: {fileID: 21300000, guid: cd484b13ffaf1e84e99d9c68ca04de8e, type: 3}

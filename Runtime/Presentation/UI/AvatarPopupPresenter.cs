@@ -16,12 +16,42 @@ namespace TrippleQ.AvatarSystem
         protected override void OnBind()
         {
             View.SetOnItemClicked(OnItemClicked);
+            View.SetOnItemFrameClicked(OnItemFrameClicked);
 
-            View.SetClose(Hide);
+            View.SetClose(() => 
+            {
+                Hide();
+            });
+
+            View.SetPrimary(string.Empty, () => 
+            {
+                var newName = View.GetNameInput();
+                if (!string.IsNullOrWhiteSpace(newName))
+                    _svc.TryUpdateUserName(newName);
+                _svc.SaveProfile();
+                View.SetNameEditing(false);
+                Hide();
+            });
+
+            View.SetOnEditNameClicked(() => 
+            {
+                //enable TMP_inputfield for edit name
+                View.SetNameEditing(true);
+                View.ClearNameInput();
+                //View.FocusNameInput();
+            });
+
+            var snap = _svc.GetUserStateSnapshot();
+
+            View.SetUserName(snap.value.userName);
+            View.SetFrame(snap.value.selectedFrameId);
+            View.SetAvatar(snap.value.selectedAvatarId);
 
             // subscribe service events
             _svc.OnAvatarChanged += OnAvatarChanged;
             _svc.OnInventoryChanged += OnInventoryChanged;
+            _svc.OnUserNameChanged += View.SetUserName;
+            _svc.OnFrameChanged += OnFrameChanged;
 
             // initial render
             RenderAll();
@@ -32,6 +62,8 @@ namespace TrippleQ.AvatarSystem
             // unsubscribe service events
             _svc.OnAvatarChanged -= OnAvatarChanged;
             _svc.OnInventoryChanged -= OnInventoryChanged;
+            _svc.OnUserNameChanged -= View.SetUserName;
+            _svc.OnFrameChanged -= OnFrameChanged;
 
             View.SetOnItemClicked(null);
         }
@@ -59,9 +91,29 @@ namespace TrippleQ.AvatarSystem
             }
         }
 
+        private void OnItemFrameClicked(AvatarId id)
+        {
+            var stateRes = _svc.GetFrameState(id);
+            if (!stateRes.ok) return;
+            switch (stateRes.value)
+            {
+                case AvatarOwnershipState.Owned:
+                case AvatarOwnershipState.Selected:
+                    _svc.TrySelectFrame(id);
+                    break;
+                case AvatarOwnershipState.Unlockable:
+                    _svc.TryUnlockAndSelectFrame(id);
+                    break;
+                default:
+                    // Locked: tuỳ game, có thể phát event ra ngoài để show IAP/ads
+                    // (Option 2: Presenter raise RequestUnlockUI(id))
+                    break;
+            }
+        }
+
         private void RenderAll()
         {
-            // list items
+            // list items, get data from DB and update grid view
             View.SetItems(_db.avatars);
 
             // selected + preview
@@ -70,7 +122,12 @@ namespace TrippleQ.AvatarSystem
             if (selectedRes.ok)
             {
                 View.SetSelected(selectedRes.value);
-                View.SetPreview(selectedRes.value);
+            }
+
+            var selectedFrameRes = _svc.GetSelectedFrameId();
+            if (selectedFrameRes.ok)
+            {
+                View.SetSelectedFrame(selectedFrameRes.value);
             }
 
             // owned/locked state for all
@@ -88,18 +145,37 @@ namespace TrippleQ.AvatarSystem
                 View.SetOwned(id, owned);
                 View.SetLocked(id, locked);
             }
+
+            foreach (var def in _db.frames)
+            {
+                if (def == null) continue;
+                var id = def.AvatarId;
+
+                var st = _svc.GetFrameState(id);
+                if (!st.ok) continue;
+
+                var owned = st.value == AvatarOwnershipState.Owned || st.value == AvatarOwnershipState.Selected;
+                var locked = st.value == AvatarOwnershipState.Locked;
+
+                View.SetOwnedFrame(id, owned);
+                View.SetLockedFrame(id, locked);
+            }
         }
 
         private void OnAvatarChanged(AvatarId id)
         {
             View.SetSelected(id);
-            View.SetPreview(id);
         }
 
         private void OnInventoryChanged()
         {
             // simplest: rerender states
             RenderAll();
+        }
+
+        private void OnFrameChanged(AvatarId id)
+        {
+            View.SetSelectedFrame(id);
         }
     }
 }

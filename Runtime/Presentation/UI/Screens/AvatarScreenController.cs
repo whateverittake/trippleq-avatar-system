@@ -6,6 +6,7 @@ namespace TrippleQ.AvatarSystem
     //“công tắc mở / đóng màn hình avatar + nơi inject UI framework vào Avatar package”.
     public class AvatarScreenController : MonoBehaviour
     {
+        [SerializeField] GameObject _avatarPopup;
         private AvatarPopupPresenter _presenter;
         private IAvatarPopupView _view;
 
@@ -46,7 +47,7 @@ namespace TrippleQ.AvatarSystem
         public void OpenAvatarPopup()
         {
             GameObject popup = null; //tuy framework, game sẽ tạo popup từ hệ thống UI của nó
-            _view = popup.GetComponent<IAvatarPopupView>();
+            _view = _avatarPopup.GetComponent<IAvatarPopupView>();
 
             _presenter.Bind(_view);
             _presenter.Show();

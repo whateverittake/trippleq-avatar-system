@@ -13,9 +13,16 @@ MonoBehaviour:
   m_Name: AvatarDatabase
   m_EditorClassIdentifier: 
   avatars:
-  - id: avatar01
+  - id: avatar1
     displayName: 
     unlockType: 0
     unlockValue: 0
     tag: 
-    isDefault: 0
+    isDefault: 1
+  frames:
+  - id: frame1
+    displayName: 
+    unlockType: 0
+    unlockValue: 0
+    tag: 
+    isDefault: 1

@@ -43,6 +43,10 @@ namespace TrippleQ.AvatarSystem
         public static bool operator !=(AvatarId a, AvatarId b) => !a.Equals(b);
     }
 
+    // NOTE:
+    // AvatarDefinition is reused for both Avatars and Frames.
+    // Avatars affect player identity.
+    // Frames are cosmetic only and must use frame APIs.
     [Serializable]
     public sealed class AvatarDefinition
     {
@@ -70,15 +74,27 @@ namespace TrippleQ.AvatarSystem
     [Serializable]
     public sealed class AvatarUserState
     {
+        public string userName;
+        public string selectedFrameId;
         public string selectedAvatarId;
+
         public List<string> ownedAvatarIds = new List<string>();
+        public List<string> ownedFrameIds = new List<string>();
 
         public bool Owns(AvatarId id) => ownedAvatarIds != null && ownedAvatarIds.Contains(id.Value);
+        public bool OwnFrame(AvatarId id) => ownedFrameIds != null && ownedFrameIds.Contains(id.Value);
         public void AddOwned(AvatarId id)
         {
             if (!id.IsValid) return;
             ownedAvatarIds ??= new List<string>();
             if (!ownedAvatarIds.Contains(id.Value)) ownedAvatarIds.Add(id.Value);
+        }
+
+        public void AddOwnedFrame(AvatarId id)
+        {
+            if(!id.IsValid) return; 
+            ownedFrameIds ??= new List<string>();
+            if (!ownedFrameIds.Contains(id.Value)) ownedFrameIds.Add(id.Value);
         }
 
         public void RemoveOwned(AvatarId id)

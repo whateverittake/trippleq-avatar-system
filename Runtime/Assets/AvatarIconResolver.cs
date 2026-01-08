@@ -25,5 +25,15 @@ namespace TrippleQ.AvatarSystem
 
             return null;
         }
+
+        public static Sprite GetFrame(string iconKey)
+        {
+            if (string.IsNullOrEmpty(iconKey))
+                return null;
+            //lookup bằng iconKey từ project library
+            if (_library != null && !string.IsNullOrEmpty(iconKey))
+                return _library.GetFrame(iconKey);
+            return null;
+        }
     }
 }

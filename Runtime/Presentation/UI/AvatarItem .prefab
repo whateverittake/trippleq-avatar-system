@@ -211,6 +211,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   button: {fileID: 2996161779981881258}
   icon: {fileID: 4536404251978216180}
+  frame: {fileID: 5595579276740672759}
   selectedRing: {fileID: 2353046742505662445}
   lockOverlay: {fileID: 6332116971341813379}
   _text: {fileID: 0}

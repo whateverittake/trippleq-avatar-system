@@ -16,6 +16,7 @@ namespace TrippleQ.AvatarSystem
         }
 
         public Entry[] entries;
+        public Entry[] entriesFrame;
 
         public Sprite Get(string key)
         {
@@ -28,6 +29,18 @@ namespace TrippleQ.AvatarSystem
                     return entries[i].sprite;
             }
 
+            return null;
+        }
+
+        public Sprite GetFrame(string key)
+        {
+            if (string.IsNullOrEmpty(key) || entriesFrame == null)
+                return null;
+            for (int i = 0; i < entriesFrame.Length; i++)
+            {
+                if (entriesFrame[i].iconKey == key)
+                    return entriesFrame[i].sprite;
+            }
             return null;
         }
     }

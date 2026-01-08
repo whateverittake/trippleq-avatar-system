@@ -9,7 +9,7 @@ namespace TrippleQ.AvatarSystem
     {
         [Header("UI")]
         [SerializeField] private Button button;
-        [SerializeField] private Image icon;
+        [SerializeField] private Image icon, frame;
         [SerializeField] private GameObject selectedRing;
         [SerializeField] private GameObject lockOverlay;
         [SerializeField] private TMP_Text _text; // optional
@@ -45,6 +45,16 @@ namespace TrippleQ.AvatarSystem
             // nếu muốn: icon mờ khi locked
             //if (icon != null)
             //    icon.color = locked ? new Color(1f, 1f, 1f, 0.35f) : Color.white;
+        }
+
+        public void UpDateFrame(Sprite frame)
+        {
+            this.frame.sprite= frame;
+        }
+
+        public void UpDateAvatar(Sprite avatarId)
+        {
+            icon.sprite = avatarId;
         }
     }
 }
