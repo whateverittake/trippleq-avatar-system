@@ -15,6 +15,11 @@ namespace TrippleQ.AvatarSystem
             Refresh();
         }
 
+        public void UpdateUI()
+        {
+            Refresh();
+        }
+
         void OnAvatarChanged(AvatarId id)
         {
             var sprite = AvatarIconResolver.Get(id.Value);
@@ -29,9 +34,11 @@ namespace TrippleQ.AvatarSystem
 
         private void Refresh()
         {
-            //var currentAvatarId = AvatarServiceLocator.Service.GetCurrentAvatarId();
-            //var sprite = AvatarIconResolver.Get(currentAvatarId.Value);
-            //view.SetIcon(sprite);
+            var currentAvatarId = AvatarServiceLocator.Service.GetSelectedAvatarId().value;
+            OnAvatarChanged(currentAvatarId);
+
+            var currentFrameId = AvatarServiceLocator.Service.GetSelectedFrameId().value;
+            OnFrameChanged(currentFrameId);
         }
     }
 }

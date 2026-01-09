@@ -48,9 +48,12 @@ namespace TrippleQ.AvatarSystem
 
             // Repair defaults
             if (string.IsNullOrWhiteSpace(_state.userName)) _state.userName = "Player";
-            
+
             if (_state.ownedAvatarIds == null) _state.ownedAvatarIds = new List<string>();
-            if(_state.ownedFrameIds == null) _state.ownedFrameIds = new List<string>();
+            GrantFreeAvatarId();
+
+            if (_state.ownedFrameIds == null) _state.ownedFrameIds = new List<string>();
+            GrantFreeFrameId();
 
             // chọn default avatar nếu chưa có
             if (string.IsNullOrWhiteSpace(_state.selectedAvatarId)) _state.selectedAvatarId = GetDefaultAvatarIdFromDb();
@@ -98,6 +101,53 @@ namespace TrippleQ.AvatarSystem
             //OnInitialized?.Invoke();
 
             //return AvatarResult.Ok();
+        }
+
+        private void GrantFreeFrameId()
+        {
+            if (_db.frames != null)
+            {
+                for (int i = 0; i < _db.frames.Count; i++)
+                {
+                    var a = _db.frames[i];
+                    if (a == null) continue;
+                    if (string.IsNullOrWhiteSpace(a.id)) continue;
+
+                    var t = a.unlockType;
+
+                    // ✅ rule: Free always owned
+                    // ✅ rule (optional): Default also owned if you treat it as starter-free
+                    if (t == AvatarUnlockType.Free || t == AvatarUnlockType.Default)
+                    {
+                        if (!_state.ownedFrameIds.Contains(a.id))
+                            _state.ownedFrameIds.Add(a.id);
+                    }
+                }
+            }
+        }
+
+        private void GrantFreeAvatarId()
+        {
+            // Grant all Free (and optionally Default) avatars as owned at init
+            if (_db.avatars != null)
+            {
+                for (int i = 0; i < _db.avatars.Count; i++)
+                {
+                    var a = _db.avatars[i];
+                    if (a == null) continue;
+                    if (string.IsNullOrWhiteSpace(a.id)) continue;
+
+                    var t = a.unlockType;
+
+                    // ✅ rule: Free always owned
+                    // ✅ rule (optional): Default also owned if you treat it as starter-free
+                    if (t == AvatarUnlockType.Free || t == AvatarUnlockType.Default)
+                    {
+                        if (!_state.ownedAvatarIds.Contains(a.id))
+                            _state.ownedAvatarIds.Add(a.id);
+                    }
+                }
+            }
         }
 
         public AvatarDatabaseSO GetAvatarDatabaseSO()
@@ -209,6 +259,8 @@ namespace TrippleQ.AvatarSystem
             if (string.Equals(_state.selectedAvatarId, id.Value, StringComparison.Ordinal))
                 return AvatarResult.Ok("Already selected.");
 
+            ////no need to change, just return ok, only invoke event when save changed
+            //return AvatarResult.Ok();
             _state.selectedAvatarId = id.Value;
 
             if (!_storage.TrySave(_state))
@@ -234,6 +286,9 @@ namespace TrippleQ.AvatarSystem
 
             if (string.Equals(_state.selectedFrameId, id.Value, StringComparison.Ordinal))
                 return AvatarResult.Ok("Already selected.");
+
+            ////no need to change, just return ok, only invoke event when save changed
+            //return AvatarResult.Ok();
 
             _state.selectedFrameId = id.Value;
 

@@ -16,12 +16,15 @@ namespace TrippleQ.AvatarSystem
                     return true;
 
                 case AvatarUnlockType.RewardedAd:
+                    Debug.LogError("RewardedAd unlock type is not Handle by BasicAvatarUnlockProvider.");
                     return false;
 
                 case AvatarUnlockType.SoftCurrency:
+                    Debug.LogError("SoftCurrency unlock type is not Handle by BasicAvatarUnlockProvider.");
                     return false;
 
                 case AvatarUnlockType.PlayerLevel:
+                    Debug.LogError("PlayerLevel unlock type is not Handle by BasicAvatarUnlockProvider.");
                     return false;
 
                 default:

@@ -10,11 +10,17 @@ namespace TrippleQ.AvatarSystem
         [SerializeField] TMP_InputField _nameInputField;
         [SerializeField] AvatarItemView _userProfile;
 
+        [SerializeField] AvatarItemView[] _avatarItems;
+        [SerializeField] AvatarItemView[] _frameItems;
+
         private Action _onSave;
         private Action _onClosePopup;
         private Action _onEditName;
         private Action<AvatarId> _onClickAvatar;
         private Action<AvatarId> _onClickFrame;
+
+        private AvatarId _focusAvatarId;
+        private AvatarId _focusFrameId;
 
         public bool IsVisible => gameObject.activeSelf;
 
@@ -33,6 +39,13 @@ namespace TrippleQ.AvatarSystem
             _onEditName?.Invoke();
         }
 
+        public void Show()
+        {
+            gameObject.SetActive(true);
+            _nameInputField.interactable = false;
+
+        }
+
         public void Hide()
         {
             gameObject.SetActive(false);
@@ -47,7 +60,50 @@ namespace TrippleQ.AvatarSystem
         //data for avatar items to fill grid view
         public void SetItems(IReadOnlyList<AvatarDefinition> defs)
         {
-            
+            bool owned = false;
+            bool selected = false;
+
+            for (int i = 0; i < defs.Count; i++)
+            {
+                var def = defs[i];
+                var itemView = _avatarItems[i];
+                itemView.Setup(def, (d) => 
+                {
+                    RefreshFocusAvatarItem();
+                    _onClickAvatar?.Invoke(d.AvatarId);
+                    _focusAvatarId= d.AvatarId;
+                    SetAvatar(d.id);
+                });
+
+                owned= AvatarServiceLocator.Service.GetUserStateSnapshot().value.Owns(def.AvatarId);
+                selected= AvatarServiceLocator.Service.GetSelectedAvatarId().value == def.AvatarId;
+
+                itemView.Render(AvatarIconResolver.Get(def.id), owned, selected);
+            }
+        }
+
+        public void SetFrameItems(IReadOnlyList<AvatarDefinition> defs)
+        {
+            bool owned = false;
+            bool selected = false;
+
+            for (int i = 0; i < defs.Count; i++)
+            {
+                var def = defs[i];
+                var itemView = _frameItems[i];
+                itemView.Setup(def, (d) => 
+                {
+                    RefreshFocusFrameItem();
+                    _onClickFrame?.Invoke(d.AvatarId);
+                    _focusFrameId= d.AvatarId;
+                    SetFrame(d.id);
+                });
+
+                owned = AvatarServiceLocator.Service.GetUserStateSnapshot().value.OwnFrame(def.AvatarId);
+                selected = AvatarServiceLocator.Service.GetSelectedFrameId().value == def.AvatarId;
+
+                itemView.Render(AvatarIconResolver.GetFrame(def.id), owned, selected);
+            }
         }
 
         public void SetMessage(string message)
@@ -89,12 +145,6 @@ namespace TrippleQ.AvatarSystem
         public void SetTitle(string title)
         {
             
-        }
-
-        public void Show()
-        {
-            gameObject.SetActive(true);
-            _nameInputField.interactable = false;
         }
 
         public void OnUnfocusEditName()
@@ -152,12 +202,33 @@ namespace TrippleQ.AvatarSystem
         #endregion
 
         #region GRID VIEW ITEM STATE UPDATES
+        private void RefreshFocusAvatarItem()
+        {
+            foreach (var item in _avatarItems)
+            {
+                item.ShowFocus(false);
+            }
+        }
+
+        private void RefreshFocusFrameItem()
+        {
+            foreach (var item in _frameItems)
+            {
+                item.ShowFocus(false);
+            }
+        }
 
         public void SetOwned(AvatarId id, bool owned)
         {
 
         }
+        //set avatar is locked or not
+        public void SetLocked(AvatarId id, bool locked)
+        {
 
+        }
+
+        //frame owned state
         public void SetOwnedFrame(AvatarId id, bool owned)
         {
 
@@ -168,12 +239,15 @@ namespace TrippleQ.AvatarSystem
 
         }
 
-        //set avatar is locked or not
-        public void SetLocked(AvatarId id, bool locked)
+        public AvatarId GetSelectedAvatarId()
         {
-
+            return _focusAvatarId;
         }
 
+        public AvatarId GetSelectedFrameId()
+        {
+            return _focusFrameId;
+        }
         #endregion
     }
 }

@@ -65,9 +65,6 @@ namespace TrippleQ.AvatarSystem
         [Tooltip("Optional tag for gating or grouping (e.g., 'halloween2026')")]
         public string tag;
 
-        [Tooltip("Is this the default fallback avatar if no selection exists?")]
-        public bool isDefault;
-
         public AvatarId AvatarId => new AvatarId(id);
     }
 

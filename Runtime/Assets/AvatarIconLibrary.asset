@@ -15,6 +15,32 @@ MonoBehaviour:
   entries:
   - iconKey: avatar1
     sprite: {fileID: 21300000, guid: 9f5cbf7becbf1344fb26d80e3f174656, type: 3}
+  - iconKey: avatar2
+    sprite: {fileID: 21300000, guid: 7ce862e85eb31324bbb23911b4563cbd, type: 3}
+  - iconKey: avatar3
+    sprite: {fileID: 21300000, guid: 5108993e1f39a6c47b39564c90e104a5, type: 3}
+  - iconKey: avatar4
+    sprite: {fileID: 21300000, guid: ade0980c3e1f05f4a953a90370115abc, type: 3}
+  - iconKey: avatar5
+    sprite: {fileID: 21300000, guid: b50481a71ce5fb742ac5a82251ea8fdb, type: 3}
+  - iconKey: avatar6
+    sprite: {fileID: 21300000, guid: 43dd21bb26e7f1d4aa8c00571a676a0f, type: 3}
+  - iconKey: avatar7
+    sprite: {fileID: 21300000, guid: 5e5fc1c8ccb57e94aad8e8d166f68116, type: 3}
+  - iconKey: avatar8
+    sprite: {fileID: 21300000, guid: 5911d3c4255b1e04e9edd497cd20aa9b, type: 3}
+  - iconKey: avatar9
+    sprite: {fileID: 21300000, guid: a88a1e7c9355c2342a926975b68fec48, type: 3}
   entriesFrame:
   - iconKey: frame1
     sprite: {fileID: 21300000, guid: cd484b13ffaf1e84e99d9c68ca04de8e, type: 3}
+  - iconKey: frame2
+    sprite: {fileID: 21300000, guid: 6327b3ce282b92641bdfe9e3ee677c87, type: 3}
+  - iconKey: frame3
+    sprite: {fileID: 21300000, guid: 4227521ec6e0a8c4d92c6db50dded9bc, type: 3}
+  - iconKey: frame4
+    sprite: {fileID: 21300000, guid: 27ba3bf1f5edbf941b721b83a31e2939, type: 3}
+  - iconKey: frame5
+    sprite: {fileID: 21300000, guid: 35b4daa3bb36b164e8c036d3ccc902d9, type: 3}
+  - iconKey: frame6
+    sprite: {fileID: 21300000, guid: db4830f47008a1e4a835c7cef5de4722, type: 3}

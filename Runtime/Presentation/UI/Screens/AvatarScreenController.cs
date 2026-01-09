@@ -41,6 +41,7 @@ namespace TrippleQ.AvatarSystem
                 _presenter = new AvatarPopupPresenter(AvatarServiceLocator.Service, svc.GetAvatarDatabaseSO());
             }
 
+            //GetComponent<AvatarWidgetController>().UpdateUI();
             GetComponent<AvatarWidgetController>().SetUpEvent();
         }
 

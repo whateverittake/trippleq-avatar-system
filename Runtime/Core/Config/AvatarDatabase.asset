@@ -18,11 +18,74 @@ MonoBehaviour:
     unlockType: 0
     unlockValue: 0
     tag: 
-    isDefault: 1
+  - id: avatar2
+    displayName: 
+    unlockType: 1
+    unlockValue: 0
+    tag: 
+  - id: avatar3
+    displayName: 
+    unlockType: 1
+    unlockValue: 0
+    tag: 
+  - id: avatar4
+    displayName: 
+    unlockType: 1
+    unlockValue: 0
+    tag: 
+  - id: avatar5
+    displayName: 
+    unlockType: 1
+    unlockValue: 0
+    tag: 
+  - id: avatar6
+    displayName: 
+    unlockType: 1
+    unlockValue: 0
+    tag: 
+  - id: avatar7
+    displayName: 
+    unlockType: 1
+    unlockValue: 0
+    tag: 
+  - id: avatar8
+    displayName: 
+    unlockType: 1
+    unlockValue: 0
+    tag: 
+  - id: avatar9
+    displayName: 
+    unlockType: 1
+    unlockValue: 0
+    tag: 
   frames:
   - id: frame1
     displayName: 
     unlockType: 0
     unlockValue: 0
     tag: 
-    isDefault: 1
+  - id: frame2
+    displayName: 
+    unlockType: 0
+    unlockValue: 0
+    tag: 
+  - id: frame3
+    displayName: 
+    unlockType: 0
+    unlockValue: 0
+    tag: 
+  - id: frame4
+    displayName: 
+    unlockType: 0
+    unlockValue: 0
+    tag: 
+  - id: frame5
+    displayName: 
+    unlockType: 0
+    unlockValue: 0
+    tag: 
+  - id: frame6
+    displayName: 
+    unlockType: 0
+    unlockValue: 0
+    tag: 

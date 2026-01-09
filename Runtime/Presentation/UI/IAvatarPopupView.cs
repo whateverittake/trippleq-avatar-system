@@ -9,6 +9,8 @@ namespace TrippleQ.AvatarSystem
         // render list
         void SetItems(IReadOnlyList<AvatarDefinition> defs);
 
+        void SetFrameItems(IReadOnlyList<AvatarDefinition> defs);
+
         // state updates
         //update selected state of avatar item
         void SetSelected(AvatarId id);
@@ -36,5 +38,7 @@ namespace TrippleQ.AvatarSystem
 
         void SetAvatar(string avatarId);
         void SetFrame(string frameId);
+        AvatarId GetSelectedAvatarId();
+        AvatarId GetSelectedFrameId();
     }
 }

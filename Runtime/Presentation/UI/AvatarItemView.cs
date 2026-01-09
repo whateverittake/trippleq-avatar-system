@@ -11,6 +11,7 @@ namespace TrippleQ.AvatarSystem
         [SerializeField] private Button button;
         [SerializeField] private Image icon, frame;
         [SerializeField] private GameObject selectedRing;
+        [SerializeField] GameObject _focusRing;
         [SerializeField] private GameObject lockOverlay;
         [SerializeField] private TMP_Text _text; // optional
 
@@ -26,7 +27,11 @@ namespace TrippleQ.AvatarSystem
             if (button != null)
             {
                 button.onClick.RemoveAllListeners();
-                button.onClick.AddListener(() => _onClick?.Invoke(Def));
+                button.onClick.AddListener(() => 
+                {
+                    _onClick?.Invoke(Def);
+                    ShowFocus(true);
+                });
             }
 
             if (_text != null)
@@ -42,9 +47,19 @@ namespace TrippleQ.AvatarSystem
             bool locked = !owned;
             if (lockOverlay != null) lockOverlay.SetActive(locked);
 
-            // nếu muốn: icon mờ khi locked
-            //if (icon != null)
-            //    icon.color = locked ? new Color(1f, 1f, 1f, 0.35f) : Color.white;
+            if(selected)
+            {
+                ShowFocus(true);
+            }
+            else
+            {
+                ShowFocus(false);
+            }
+        }
+
+        public void ShowFocus(bool isShow)
+        {
+            _focusRing.SetActive(isShow);
         }
 
         public void UpDateFrame(Sprite frame)

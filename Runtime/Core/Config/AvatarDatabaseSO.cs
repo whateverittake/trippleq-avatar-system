@@ -76,7 +76,7 @@ namespace TrippleQ.AvatarSystem
             for (int i = 0; i < frames.Count; i++)
             {
                 var a = frames[i];
-                if (a != null && a.isDefault && !string.IsNullOrWhiteSpace(a.id)) return a;
+                if (a != null && a.unlockType == AvatarUnlockType.Default && !string.IsNullOrWhiteSpace(a.id)) return a;
             }
 
             // fallback first valid
@@ -96,7 +96,7 @@ namespace TrippleQ.AvatarSystem
             for (int i = 0; i < avatars.Count; i++)
             {
                 var a = avatars[i];
-                if (a != null && a.isDefault && !string.IsNullOrWhiteSpace(a.id)) return a;
+                if (a != null && a.unlockType== AvatarUnlockType.Default && !string.IsNullOrWhiteSpace(a.id)) return a;
             }
 
             // fallback first valid
@@ -128,7 +128,7 @@ namespace TrippleQ.AvatarSystem
                 if (a == null) { errors.Add("AvatarDatabase: contains null definition."); continue; }
                 if (string.IsNullOrWhiteSpace(a.id)) { errors.Add("AvatarDatabase: avatar has empty id."); continue; }
                 if (!seen.Add(a.id)) errors.Add($"AvatarDatabase: duplicate id '{a.id}'.");
-                if (a.isDefault) defaultCount++;
+                if (a.unlockType== AvatarUnlockType.Default) defaultCount++;
             }
 
             if (defaultCount == 0) errors.Add("AvatarDatabase: no default avatar (isDefault=true).");

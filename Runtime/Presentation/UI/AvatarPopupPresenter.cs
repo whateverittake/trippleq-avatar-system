@@ -28,7 +28,26 @@ namespace TrippleQ.AvatarSystem
                 var newName = View.GetNameInput();
                 if (!string.IsNullOrWhiteSpace(newName))
                     _svc.TryUpdateUserName(newName);
-                _svc.SaveProfile();
+
+                var selectedAvatarId = View.GetSelectedAvatarId();
+                if(selectedAvatarId != null)
+                {
+                    _svc.TrySelect((AvatarId)selectedAvatarId);
+                }
+
+                var selectedFrameId = View.GetSelectedFrameId();
+                if(selectedFrameId != null)
+                {
+                    _svc.TrySelectFrame((AvatarId)selectedFrameId);
+                }
+
+                AvatarResult result =  _svc.SaveProfile();
+
+                if (result.ok)
+                {
+
+                }
+
                 View.SetNameEditing(false);
                 Hide();
             });
@@ -77,7 +96,7 @@ namespace TrippleQ.AvatarSystem
             {
                 case AvatarOwnershipState.Owned:
                 case AvatarOwnershipState.Selected:
-                    _svc.TrySelect(id);
+                    //_svc.TrySelect(id);
                     break;
 
                 case AvatarOwnershipState.Unlockable:
@@ -99,7 +118,7 @@ namespace TrippleQ.AvatarSystem
             {
                 case AvatarOwnershipState.Owned:
                 case AvatarOwnershipState.Selected:
-                    _svc.TrySelectFrame(id);
+                    //_svc.TrySelectFrame(id);
                     break;
                 case AvatarOwnershipState.Unlockable:
                     _svc.TryUnlockAndSelectFrame(id);
@@ -115,6 +134,7 @@ namespace TrippleQ.AvatarSystem
         {
             // list items, get data from DB and update grid view
             View.SetItems(_db.avatars);
+            View.SetFrameItems(_db.frames);
 
             // selected + preview
             var selectedRes = _svc.GetSelectedAvatarId();
@@ -131,21 +151,12 @@ namespace TrippleQ.AvatarSystem
             }
 
             // owned/locked state for all
-            foreach (var def in _db.avatars)
-            {
-                if (def == null) continue;
-                var id = def.AvatarId;
+            RefreshAvatarItemsOnGridState();
+            RefreshFrameItemsOnGridState();
+        }
 
-                var st = _svc.GetAvatarState(id);
-                if (!st.ok) continue;
-
-                var owned = st.value == AvatarOwnershipState.Owned || st.value == AvatarOwnershipState.Selected;
-                var locked = st.value == AvatarOwnershipState.Locked;
-
-                View.SetOwned(id, owned);
-                View.SetLocked(id, locked);
-            }
-
+        private void RefreshFrameItemsOnGridState()
+        {
             foreach (var def in _db.frames)
             {
                 if (def == null) continue;
@@ -160,6 +171,30 @@ namespace TrippleQ.AvatarSystem
                 View.SetOwnedFrame(id, owned);
                 View.SetLockedFrame(id, locked);
             }
+        }
+
+        private void RefreshAvatarItemsOnGridState()
+        {
+            foreach (var def in _db.avatars)
+            {
+                if (def == null) continue;
+                var id = def.AvatarId;
+
+                var st = _svc.GetAvatarState(id);
+                if (!st.ok) continue;
+
+                var owned = st.value == AvatarOwnershipState.Owned || st.value == AvatarOwnershipState.Selected;
+                var locked = st.value == AvatarOwnershipState.Locked;
+
+                View.SetOwned(id, owned);
+                View.SetLocked(id, locked);
+            }
+        }
+
+        protected override void OnAfterShow()
+        {
+            base.OnAfterShow();
+            RenderAll();
         }
 
         private void OnAvatarChanged(AvatarId id)
