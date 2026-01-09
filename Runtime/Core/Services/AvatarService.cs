@@ -469,5 +469,10 @@ namespace TrippleQ.AvatarSystem
                 _state.ownedFrameIds.Add(_state.selectedFrameId);
             }
         }
+
+        internal AvatarUserState GetAvatarInfo()
+        {
+            return _state;
+        }
     }
 }

@@ -71,5 +71,20 @@ namespace TrippleQ.AvatarSystem
         {
             icon.sprite = avatarId;
         }
+
+        public void Refresh()
+        {
+            if (AvatarServiceLocator.Service == null)
+            {
+                Debug.LogWarning("[AvatarItemView] AvatarService is not ready.");
+                return;
+            }
+
+            var info = AvatarServiceLocator.Service.GetAvatarInfo();
+            var iconSprite = AvatarIconResolver.Get(info.selectedAvatarId);
+            UpDateAvatar(iconSprite);
+            var frameSprite = AvatarIconResolver.GetFrame(info.selectedFrameId);
+            UpDateFrame(frameSprite);
+        }
     }
 }
