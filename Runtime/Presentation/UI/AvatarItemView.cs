@@ -86,5 +86,21 @@ namespace TrippleQ.AvatarSystem
             var frameSprite = AvatarIconResolver.GetFrame(info.selectedFrameId);
             UpDateFrame(frameSprite);
         }
+
+        #region SEARCHING
+        public void SetSearching()
+        {
+            icon.gameObject.SetActive(false);
+            _focusRing.SetActive(true);
+            selectedRing.SetActive(true);
+        }
+
+        public void SetFound()
+        {
+            icon.gameObject.SetActive(true);
+            _focusRing.SetActive(false);
+            selectedRing.SetActive(false);
+        }
+        #endregion
     }
 }
