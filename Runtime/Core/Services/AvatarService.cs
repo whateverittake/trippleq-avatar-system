@@ -363,38 +363,20 @@ namespace TrippleQ.AvatarSystem
         // Convenience: unlock then select (common UX)
         public AvatarResult TryUnlockAndSelect(AvatarId id)
         {
-            var unlock = TryUnlock(id);
-            if (!unlock.ok && unlock.error != AvatarError.None)
-            {
-                // If already owned, proceed to select
-                if (unlock.error != AvatarError.None && unlock.error != AvatarError.NotUnlockable && unlock.error != AvatarError.UnlockProviderFailure)
-                {
-                    // For cases like StorageFailure, stop
-                    if (unlock.error == AvatarError.StorageFailure) return unlock;
-                }
-            }
+            if (_state.Owns(id)) return TrySelect(id);
 
-            // If not owned and unlock failed -> stop
-            if (!_state.Owns(id)) return unlock.ok ? AvatarResult.Fail(AvatarError.NotOwned, "Unlock did not grant ownership.") : unlock;
+            var unlock = TryUnlock(id);
+            if (!unlock.ok) return unlock;
 
             return TrySelect(id);
         }
 
         public AvatarResult TryUnlockAndSelectFrame(AvatarId id)
         {
-            var unlock = TryUnlockFrame(id);
-            if (!unlock.ok && unlock.error != AvatarError.None)
-            {
-                // If already owned, proceed to select
-                if (unlock.error != AvatarError.None && unlock.error != AvatarError.NotUnlockable && unlock.error != AvatarError.UnlockProviderFailure)
-                {
-                    // For cases like StorageFailure, stop
-                    if (unlock.error == AvatarError.StorageFailure) return unlock;
-                }
-            }
+            if (_state.OwnFrame(id)) return TrySelectFrame(id);
 
-            // If not owned and unlock failed -> stop
-            if (!_state.OwnFrame(id)) return unlock.ok ? AvatarResult.Fail(AvatarError.NotOwned, "Unlock did not grant ownership.") : unlock;
+            var unlock = TryUnlockFrame(id);
+            if (!unlock.ok) return unlock;
 
             return TrySelectFrame(id);
         }

@@ -58,51 +58,35 @@ namespace TrippleQ.AvatarSystem
         }
 
         //data for avatar items to fill grid view
-        public void SetItems(IReadOnlyList<AvatarDefinition> defs)
+        public void RenderAvatarItem(AvatarDefinition def, bool isOwned, bool isSelected, int index ) 
         {
-            bool owned = false;
-            bool selected = false;
-
-            for (int i = 0; i < defs.Count; i++)
+            var itemView = _avatarItems[index];
+            if(itemView != null)
             {
-                var def = defs[i];
-                var itemView = _avatarItems[i];
-                itemView.Setup(def, (d) => 
+                itemView.Setup(def, (d) =>
                 {
                     RefreshFocusAvatarItem();
                     _onClickAvatar?.Invoke(d.AvatarId);
-                    _focusAvatarId= d.AvatarId;
+                    _focusAvatarId = d.AvatarId;
                     SetAvatar(d.id);
                 });
-
-                owned= AvatarServiceLocator.Service.GetUserStateSnapshot().value.Owns(def.AvatarId);
-                selected= AvatarServiceLocator.Service.GetSelectedAvatarId().value == def.AvatarId;
-
-                itemView.Render(AvatarIconResolver.Get(def.id), owned, selected);
+                itemView.Render(AvatarIconResolver.Get(def.id), isOwned, isSelected);
             }
         }
 
-        public void SetFrameItems(IReadOnlyList<AvatarDefinition> defs)
+        public void RenderFrameItem(AvatarDefinition def, bool isOwned, bool isSelected, int index)
         {
-            bool owned = false;
-            bool selected = false;
-
-            for (int i = 0; i < defs.Count; i++)
+            var itemView = _frameItems[index];
+            if (itemView != null)
             {
-                var def = defs[i];
-                var itemView = _frameItems[i];
-                itemView.Setup(def, (d) => 
+                itemView.Setup(def, (d) =>
                 {
                     RefreshFocusFrameItem();
                     _onClickFrame?.Invoke(d.AvatarId);
-                    _focusFrameId= d.AvatarId;
+                    _focusFrameId = d.AvatarId;
                     SetFrame(d.id);
                 });
-
-                owned = AvatarServiceLocator.Service.GetUserStateSnapshot().value.OwnFrame(def.AvatarId);
-                selected = AvatarServiceLocator.Service.GetSelectedFrameId().value == def.AvatarId;
-
-                itemView.Render(AvatarIconResolver.GetFrame(def.id), owned, selected);
+                itemView.Render(AvatarIconResolver.GetFrame(def.id), isOwned, isSelected);
             }
         }
 

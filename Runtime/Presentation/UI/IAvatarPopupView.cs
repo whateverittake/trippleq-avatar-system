@@ -7,9 +7,8 @@ namespace TrippleQ.AvatarSystem
     public interface IAvatarPopupView : ITrippleQPopupView
     {
         // render list
-        void SetItems(IReadOnlyList<AvatarDefinition> defs);
-
-        void SetFrameItems(IReadOnlyList<AvatarDefinition> defs);
+        void RenderAvatarItem(AvatarDefinition def, bool owned, bool selected, int i);
+        void RenderFrameItem(AvatarDefinition def, bool owned, bool selected, int i);
 
         // state updates
         //update selected state of avatar item

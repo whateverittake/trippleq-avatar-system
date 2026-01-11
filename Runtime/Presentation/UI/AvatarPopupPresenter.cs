@@ -30,16 +30,10 @@ namespace TrippleQ.AvatarSystem
                     _svc.TryUpdateUserName(newName);
 
                 var selectedAvatarId = View.GetSelectedAvatarId();
-                if(selectedAvatarId != null)
-                {
-                    _svc.TrySelect((AvatarId)selectedAvatarId);
-                }
+                if (selectedAvatarId.IsValid) _svc.TrySelect(selectedAvatarId);
 
                 var selectedFrameId = View.GetSelectedFrameId();
-                if(selectedFrameId != null)
-                {
-                    _svc.TrySelectFrame((AvatarId)selectedFrameId);
-                }
+                if (selectedFrameId.IsValid) _svc.TrySelectFrame(selectedFrameId);
 
                 AvatarResult result =  _svc.SaveProfile();
 
@@ -85,6 +79,10 @@ namespace TrippleQ.AvatarSystem
             _svc.OnFrameChanged -= OnFrameChanged;
 
             View.SetOnItemClicked(null);
+            View.SetOnItemFrameClicked(null);
+            View.SetOnEditNameClicked(null);
+            View.SetPrimary(null, null);
+            View.SetClose(null);
         }
 
         private void OnItemClicked(AvatarId id)
@@ -133,8 +131,8 @@ namespace TrippleQ.AvatarSystem
         private void RenderAll()
         {
             // list items, get data from DB and update grid view
-            View.SetItems(_db.avatars);
-            View.SetFrameItems(_db.frames);
+            RenderAllAvatar();
+            RenderAllFrame();
 
             // selected + preview
             var selectedRes = _svc.GetSelectedAvatarId();
@@ -153,6 +151,42 @@ namespace TrippleQ.AvatarSystem
             // owned/locked state for all
             RefreshAvatarItemsOnGridState();
             RefreshFrameItemsOnGridState();
+        }
+
+        private void RenderAllAvatar() 
+        {
+            var state = _svc.GetUserStateSnapshot();
+
+            for(int i=0;i< _db.avatars.Count; i++)
+            {
+                var def = _db.avatars[i];
+                bool owned = state.value.Owns(def.AvatarId);
+                bool selected = state.value.selectedAvatarId.Equals(def.AvatarId);
+
+                View.RenderAvatarItem(
+                    def,
+                    owned,
+                    selected,
+                    i
+                );
+            }
+        }
+
+        private void RenderAllFrame()
+        {
+            var state = _svc.GetUserStateSnapshot();
+            for (int i = 0; i < _db.frames.Count; i++)
+            {
+                var def = _db.frames[i];
+                bool owned = state.value.OwnFrame(def.AvatarId);
+                bool selected = state.value.selectedFrameId.Equals(def.AvatarId);
+                View.RenderFrameItem(
+                    def,
+                    owned,
+                    selected,
+                    i
+                );
+            }
         }
 
         private void RefreshFrameItemsOnGridState()
