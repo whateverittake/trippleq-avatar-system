@@ -40,6 +40,7 @@ namespace TrippleQ.AvatarSystem
         {
             _onEditName?.Invoke();
             _editNameBtn.SetActive(false);
+            _nameInputField.ActivateInputField();
         }
 
         public void Show()
