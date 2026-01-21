@@ -13,6 +13,8 @@ namespace TrippleQ.AvatarSystem
         [SerializeField] AvatarItemView[] _avatarItems;
         [SerializeField] AvatarItemView[] _frameItems;
 
+        [SerializeField] GameObject _editNameBtn;
+
         private Action _onSave;
         private Action _onClosePopup;
         private Action _onEditName;
@@ -37,13 +39,14 @@ namespace TrippleQ.AvatarSystem
         public void OnEditNameBtnClick()
         {
             _onEditName?.Invoke();
+            _editNameBtn.SetActive(false);
         }
 
         public void Show()
         {
             gameObject.SetActive(true);
             _nameInputField.interactable = false;
-
+            _editNameBtn.SetActive(true);
         }
 
         public void Hide()
@@ -134,6 +137,8 @@ namespace TrippleQ.AvatarSystem
         public void OnUnfocusEditName()
         {
             _nameInputField.interactable = false;
+
+            _editNameBtn.SetActive(true);
         }
 
         #region EDIT NAME
