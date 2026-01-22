@@ -1,7 +1,7 @@
 {
   "name": "com.trippleq.avatar-system",
   "version": "0.1.2",
-  "displayName": "Avatar System",
+  "displayName": "TrippleQ Avatar System",
   "description": "Reusable avatar system core for casual games. Includes database SO, persistence, and unlock integration interfaces.",
   "unity": "6000.0",
   "unityRelease": "58f2",
